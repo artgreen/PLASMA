@@ -37,10 +37,14 @@ struc t_fileio
     word newline
     word readblock
     word writeblock
+    word getmark
+    word setmark
+    word seteof
 end
 predef a2getpfx(path), a23setpfx(path), a2getfileinfo(path, fileinfo), a23geteof(refnum), a2iobufs(iobufs), a2open(path), a2close(refnum)
 predef a23read(refnum, buf, len), a2write(refnum, buf, len), a2create(path, type, aux), a23destroy(path)
 predef a2newline(refnum, emask, nlchar), a2readblock(unit, buf, block), a2writeblock(unit, buf, block)
+predef a2getmark(refnum), a2setmark(refnum, pos), a2seteof(refnum, pos)
 //
 // Exported function table.
 //
@@ -48,6 +52,7 @@ word fileio[]
 word = @a2getpfx, @a23setpfx, @a2getfileinfo, @a23geteof, @a2iobufs, @a2open, @a2close
 word = @a23read, @a2write, @a2create, @a23destroy
 word = @a2newline, @a2readblock, @a2writeblock
+word = @a2getmark, @a2setmark, @a2seteof
 //
 // SOS/ProDOS error code
 //
@@ -351,6 +356,34 @@ def a2writeblock(unit, buf, block)
     params:4 = block
     perr     = syscall($81, @params)
     return perr
+end
+def a2getmark(refnum)
+    byte params[6]
+
+    params.0 = 2
+    params.1 = refnum
+    perr     = syscall($CF, @params)
+    return params:2
+end
+def a2setmark(refnum, p_pos)
+    byte params[6]
+
+    params.0 = 2
+    params.1 = refnum
+    params:2 = *p_pos
+    params:4 = *(p_pos+2)
+    perr     = syscall($CE, @params)
+    return params:2
+end
+def a2seteof(refnum, p_pos)
+    byte params[6]
+
+    params.0 = 2
+    params.1 = refnum
+    params:2 = *p_pos
+    params:4 = *(p_pos+2)
+    perr     = syscall($D0, @params)
+    return params:2
 end
 //
 // Machine specific initialization.

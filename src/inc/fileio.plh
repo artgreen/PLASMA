@@ -48,6 +48,9 @@ import fileio
         word newline
         word readblock
         word writeblock
+        word getmark
+        word setmark
+        word seteof
     end
     //
     // Globally accessible error code
